@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Glassfabriken — Ice Cream ERP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --choc-dark:#1a0a00;--choc:#2e1200;--choc-mid:#4a1e00;--choc-light:#7a3410;
+      --caramel:#c4641a;--cream:#fff8ed;--cream2:#fef0d0;--mint:#00c896;
+      --strawberry:#ff4d6d;--vanilla:#ffd166;--text:#fff8ed;--text2:#e8c99a;
+      --text3:#9a7040;--border:rgba(196,100,26,0.25);--border2:rgba(196,100,26,0.45);
+      --card:rgba(74,30,0,0.6);--card2:rgba(46,18,0,0.8);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--choc-dark);color:var(--text);overflow-x:hidden}
+    body{background:radial-gradient(ellipse 120% 80% at 50% -10%,#7a3410 0%,#2e1200 35%,#1a0a00 65%,#0d0500 100%)}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.06;
+      background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c4641a' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+
+    /* LOGIN */
+    .login-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+      background:radial-gradient(ellipse at 50% 30%,#7a3410 0%,#1a0a00 70%)}
+    .login-box{width:min(460px,92vw);padding:48px 44px;text-align:center;
+      background:linear-gradient(160deg,rgba(74,30,0,0.95),rgba(26,10,0,0.98));
+      border:1px solid var(--border2);border-radius:28px;
+      box-shadow:0 0 80px rgba(196,100,26,.2),0 32px 80px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,248,237,.06)}
+    .login-cone{font-size:72px;margin-bottom:12px;display:block;
+      animation:float 3s ease-in-out infinite;filter:drop-shadow(0 8px 24px rgba(196,100,26,.5))}
+    @keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+    .login-title{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:var(--cream);margin-bottom:4px}
+    .login-sub{font-size:13px;color:var(--text3);margin-bottom:8px;letter-spacing:.03em}
+    .login-saved-info{font-size:11px;color:var(--mint);margin-bottom:20px;font-family:'JetBrains Mono',monospace;
+      background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:8px;padding:8px 12px;display:none}
+    .login-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text3);font-size:11px}
+    .login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+    .login-label{display:block;text-align:left;font-size:10px;font-weight:600;color:var(--text3);
+      text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;font-family:'JetBrains Mono',monospace}
+    .login-input{width:100%;padding:15px 18px;background:rgba(0,0,0,.4);
+      border:1px solid var(--border2);border-radius:14px;font-size:14px;
+      font-family:'Outfit',sans-serif;color:var(--cream);outline:none;
+      transition:border .2s,box-shadow .2s;margin-bottom:12px;letter-spacing:.08em}
+    .login-input:focus{border-color:var(--caramel);box-shadow:0 0 0 3px rgba(196,100,26,.15)}
+    .login-input::placeholder{color:var(--text3)}
+    .login-remember{display:flex;align-items:center;gap:8px;margin-bottom:16px;text-align:left}
+    .login-remember input{width:16px;height:16px;accent-color:var(--caramel);cursor:pointer}
+    .login-remember label{font-size:12px;color:var(--text2);cursor:pointer}
+    .login-btn{width:100%;padding:15px;background:linear-gradient(135deg,#c4641a,#a04d10);
+      color:var(--cream);border:none;border-radius:14px;font-family:'Playfair Display',serif;
+      font-size:17px;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .2s;
+      box-shadow:0 8px 28px rgba(196,100,26,.5),inset 0 1px 0 rgba(255,255,255,.1)}
+    .login-btn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(196,100,26,.6)}
+    .login-clear{margin-top:12px;font-size:11px;color:var(--text3);cursor:pointer;
+      font-family:'JetBrains Mono',monospace;background:none;border:none;text-decoration:underline;
+      display:none}
+    .login-clear:hover{color:var(--strawberry)}
+    .login-err{font-size:12px;color:var(--strawberry);margin-top:12px;
+      display:none;font-family:'JetBrains Mono',monospace}
+
+    /* SHELL */
+    .shell{display:flex;height:100vh;position:relative;z-index:1}
+
+    /* SIDEBAR */
+    .sidebar{width:230px;flex-shrink:0;
+      background:linear-gradient(180deg,rgba(46,18,0,0.98) 0%,rgba(26,10,0,0.99) 100%);
+      border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;overflow:hidden}
+    .sidebar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:1px;
+      background:linear-gradient(180deg,transparent,var(--caramel),transparent);opacity:.3}
+    .brand{padding:28px 22px 22px;border-bottom:1px solid var(--border)}
+    .brand-icon{font-size:38px;margin-bottom:10px;display:block;filter:drop-shadow(0 4px 12px rgba(196,100,26,.6))}
+    .brand-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:900;color:var(--cream);letter-spacing:.04em}
+    .brand-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--caramel);margin-top:4px;letter-spacing:.14em;text-transform:uppercase}
+    .brand-status{display:inline-flex;align-items:center;gap:6px;margin-top:10px;
+      background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:999px;
+      padding:4px 12px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)}
+    .brand-dot{width:6px;height:6px;border-radius:50%;background:#4a2000;flex-shrink:0}
+    .brand-dot.live{background:var(--mint);box-shadow:0 0 8px var(--mint);animation:blink 1.5s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+    .nav{flex:1;padding:12px 0;overflow-y:auto}
+    .nav-section{padding:18px 22px 7px;font-size:9px;font-weight:600;color:var(--text3);
+      letter-spacing:.16em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 22px;cursor:pointer;
+      font-size:13.5px;font-weight:500;color:var(--text2);transition:all .15s;
+      border:none;background:none;width:100%;text-align:left;position:relative}
+    .nav-item:hover{color:var(--cream);background:rgba(196,100,26,.08)}
+    .nav-item.active{color:var(--vanilla);background:rgba(196,100,26,.12)}
+    .nav-item.active::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;
+      background:linear-gradient(180deg,var(--caramel),var(--vanilla));border-radius:0 3px 3px 0;
+      box-shadow:0 0 10px rgba(255,209,102,.4)}
+    .nav-icon{width:20px;text-align:center;font-size:16px;flex-shrink:0}
+    .nav-num{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;
+      background:rgba(196,100,26,.2);border:1px solid var(--border);color:var(--text3);padding:2px 7px;border-radius:4px}
+    .nav-key-badge{margin-top:auto;padding:14px 22px;border-top:1px solid var(--border);
+      font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)}
+    .nav-key-badge span{color:var(--mint);font-weight:600}
+
+    /* MAIN */
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .topbar{height:58px;flex-shrink:0;background:rgba(26,10,0,.95);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;padding:0 28px;backdrop-filter:blur(10px)}
+    .topbar-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--cream);font-weight:700}
+    .topbar-right{display:flex;align-items:center;gap:10px}
+    .status-chip{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;
+      font-size:10px;background:rgba(0,0,0,.4);border:1px solid var(--border2);color:var(--text3);padding:5px 14px;border-radius:8px}
+    .status-chip.online{border-color:rgba(0,200,150,.3);color:var(--mint)}
+    .logout-btn{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);color:var(--strawberry);
+      font-size:11px;font-family:'JetBrains Mono',monospace;padding:5px 12px;border-radius:8px;cursor:pointer;transition:all .15s}
+    .logout-btn:hover{background:rgba(255,77,109,.18)}
+
+    /* HERO */
+    .hero{position:relative;height:200px;overflow:hidden;flex-shrink:0;transition:all .35s}
+    .hero.hidden{display:none}
+    .hero-img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.55) saturate(1.3)}
+    .hero-overlay{position:absolute;inset:0;
+      background:linear-gradient(90deg,rgba(26,10,0,.95) 0%,rgba(26,10,0,.6) 50%,rgba(26,10,0,.2) 100%);
+      display:flex;align-items:center;padding:0 36px}
+    .hero-title{font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,40px);
+      font-weight:900;color:var(--cream);line-height:1.1;text-shadow:0 2px 20px rgba(0,0,0,.5)}
+    .hero-title em{font-style:italic;color:var(--vanilla)}
+    .hero-sub{font-size:13px;color:var(--text2);margin-top:7px}
+    .hero-badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+    .hero-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:999px;
+      font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace}
+    .badge-choc{background:rgba(196,100,26,.25);border:1px solid rgba(196,100,26,.5);color:var(--caramel)}
+    .badge-mint{background:rgba(0,200,150,.12);border:1px solid rgba(0,200,150,.3);color:var(--mint)}
+
+    /* STATS */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:22px 24px 0;transition:all .35s}
+    .stats-row.hidden{display:none}
+    .stat-card{position:relative;overflow:hidden;border-radius:16px;padding:18px 18px 16px;
+      background:var(--card);border:1px solid var(--border);transition:border-color .2s,transform .2s}
+    .stat-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+    .stat-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+      background:var(--bar,var(--caramel));opacity:.6;border-radius:0 0 2px 2px}
+    .stat-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.14em;font-family:'JetBrains Mono',monospace}
+    .stat-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--cream);margin:6px 0 3px;line-height:1}
+    .stat-sub{font-size:11px;color:var(--text3)}
+    .stat-icon{position:absolute;top:14px;right:14px;font-size:20px;opacity:.2}
+
+    /* CONTENT */
+    .content{flex:1;overflow-y:auto;padding:22px 24px 32px}
+    .content.expanded{padding-top:18px}
+
+    /* PANEL */
+    .panel{background:var(--card2);border:1px solid var(--border);border-radius:20px;
+      overflow:hidden;margin-top:22px;box-shadow:0 8px 40px rgba(0,0,0,.4)}
+    .panel-header{padding:18px 22px;border-bottom:1px solid var(--border);
+      background:rgba(196,100,26,.06);display:flex;align-items:center;gap:10px}
+    .panel-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--cream)}
+    .panel-body{padding:22px}
+
+    /* PRODUCT GRID */
+    .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+    .product-card{background:linear-gradient(160deg,rgba(74,30,0,.8),rgba(26,10,0,.9));
+      border:1px solid var(--border);border-radius:18px;overflow:hidden;
+      transition:transform .2s,border-color .2s,box-shadow .2s;cursor:pointer}
+    .product-card:hover{transform:translateY(-5px);border-color:var(--caramel);box-shadow:0 12px 32px rgba(196,100,26,.25)}
+    .product-img{width:100%;height:130px;object-fit:cover;display:block}
+    .product-img-placeholder{width:100%;height:130px;display:flex;align-items:center;justify-content:center;
+      font-size:52px;background:radial-gradient(circle at 50% 60%,rgba(196,100,26,.2),transparent)}
+    .product-info{padding:12px 14px}
+    .product-name{font-family:'Playfair Display',serif;font-size:13px;color:var(--cream);margin-bottom:3px;font-weight:700}
+    .product-sku{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:10px}
+    .product-footer{display:flex;justify-content:space-between;align-items:center}
+    .product-price{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--vanilla);
+      background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.2);padding:3px 8px;border-radius:5px}
+    .stock-ok{font-size:10px;color:var(--mint);font-weight:600}
+    .stock-low{font-size:10px;color:var(--strawberry);font-weight:600}
+
+    /* FORMS */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-group.full{grid-column:1/-1}
+    .form-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;font-family:'JetBrains Mono',monospace}
+    .form-input{background:rgba(0,0,0,.35);border:1px solid var(--border2);border-radius:11px;
+      padding:11px 15px;font-size:13.5px;font-family:'Outfit',sans-serif;color:var(--cream);outline:none;transition:all .15s}
+    .form-input:focus{border-color:var(--caramel);background:rgba(0,0,0,.5);box-shadow:0 0 0 3px rgba(196,100,26,.1)}
+    .form-input::placeholder{color:var(--text3)}
+    select.form-input{cursor:pointer}
+    .form-actions{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+
+    /* BUTTONS */
+    .btn{font-family:'Outfit',sans-serif;font-weight:600;font-size:13px;padding:10px 22px;
+      border:none;border-radius:11px;cursor:pointer;transition:all .15s;letter-spacing:.02em;position:relative;overflow:hidden}
+    .btn::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.08) 0%,transparent 60%);pointer-events:none}
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{background:linear-gradient(135deg,#c4641a,#a04d10);color:var(--cream);box-shadow:0 4px 18px rgba(196,100,26,.4)}
+    .btn-vanilla{background:linear-gradient(135deg,#ffd166,#e6b82a);color:#3a2000;box-shadow:0 4px 18px rgba(255,209,102,.3)}
+    .btn-mint{background:linear-gradient(135deg,#00c896,#009e78);color:#002a1f;box-shadow:0 4px 18px rgba(0,200,150,.3)}
+    .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+    .btn-ghost:hover{border-color:var(--caramel);color:var(--caramel)}
+    .btn-danger{background:rgba(255,77,109,.1);color:var(--strawberry);border:1px solid rgba(255,77,109,.25)}
+    .btn-danger:hover{background:rgba(255,77,109,.2)}
+    .btn-sm{padding:7px 15px;font-size:12px}
+
+    /* TABLE */
+    .data-table{width:100%;border-collapse:collapse;font-size:13px}
+    .data-table th{padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;
+      font-size:9px;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;
+      border-bottom:1px solid var(--border);background:rgba(196,100,26,.05)}
+    .data-table td{padding:12px 14px;border-bottom:1px solid rgba(196,100,26,.1);color:var(--text2);vertical-align:middle}
+    .data-table tr:last-child td{border-bottom:none}
+    .data-table tr:hover td{background:rgba(196,100,26,.05);color:var(--cream)}
+    .mono{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--caramel)}
+    .price-tag{font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(255,209,102,.1);
+      color:var(--vanilla);padding:3px 9px;border-radius:5px;border:1px solid rgba(255,209,102,.15)}
+    .tbl-btn{font-size:11px;font-weight:600;font-family:'Outfit',sans-serif;border:none;border-radius:7px;padding:5px 11px;cursor:pointer;transition:all .15s}
+    .tbl-btn-edit{background:rgba(196,100,26,.15);color:var(--caramel)}
+    .tbl-btn-edit:hover{background:rgba(196,100,26,.3)}
+    .tbl-btn-del{background:rgba(255,77,109,.1);color:var(--strawberry)}
+    .tbl-btn-del:hover{background:rgba(255,77,109,.2)}
+    .edit-row td{background:rgba(196,100,26,.07)}
+    .edit-row input{background:rgba(0,0,0,.4);border:1px solid var(--caramel);border-radius:7px;
+      padding:5px 9px;font-size:12px;color:var(--cream);font-family:'JetBrains Mono',monospace;width:90px;outline:none}
+
+    /* ORDER */
+    .order-section{display:flex;flex-direction:column;gap:16px}
+    .order-row{display:flex;gap:10px;align-items:flex-end}
+    .order-row .form-group{flex:1}
+    .line-item{display:grid;grid-template-columns:1fr 110px auto;gap:10px;align-items:center;
+      background:rgba(196,100,26,.07);border:1px solid var(--border);border-radius:11px;padding:11px 14px}
+    .line-item span{font-size:13px;color:var(--cream);font-weight:500}
+    .line-item input{background:rgba(0,0,0,.4);border:1px solid var(--border2);border-radius:7px;
+      padding:7px 10px;font-size:13px;color:var(--cream);outline:none;width:100%}
+    .line-item input:focus{border-color:var(--caramel)}
+    .remove-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;transition:color .15s}
+    .remove-btn:hover{color:var(--strawberry)}
+
+    /* INVOICE */
+    .invoice{background:linear-gradient(160deg,rgba(74,30,0,.7),rgba(26,10,0,.9));
+      border:1px solid var(--border2);border-radius:16px;padding:22px;max-width:540px;font-family:'JetBrains Mono',monospace}
+    .invoice h3{font-family:'Playfair Display',serif;font-size:16px;color:var(--vanilla);margin-bottom:12px}
+    .inv-meta{font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.8}
+    .inv-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;color:var(--text2)}
+    .inv-row.header{color:var(--text3);border-bottom:1px solid var(--border);padding-bottom:9px;margin-bottom:4px;font-size:10px;letter-spacing:.1em}
+    .inv-row.total{font-weight:600;color:var(--vanilla);border-top:1px solid var(--border);margin-top:6px;padding-top:9px;font-size:14px}
+    .inv-row.discount{color:var(--mint)}
+
+    /* FILE ZONE */
+    .file-zone{border:1.5px dashed var(--border2);border-radius:16px;padding:36px;text-align:center;
+      cursor:pointer;transition:all .2s;background:rgba(196,100,26,.04)}
+    .file-zone:hover{border-color:var(--caramel);background:rgba(196,100,26,.08)}
+    .file-zone input{display:none}
+    .file-zone p{font-size:13px;color:var(--text2);margin-top:8px}
+
+    .masked{color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em}
+    .sec-note{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--vanilla);
+      margin-bottom:14px;font-family:'JetBrains Mono',monospace;
+      background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.15);border-radius:8px;padding:8px 12px}
+
+    .shutdown-box{display:flex;flex-direction:column;align-items:center;gap:20px;padding:52px;text-align:center}
+    .shutdown-box h3{font-family:'Playfair Display',serif;font-size:24px;color:var(--strawberry)}
+    .shutdown-box p{font-size:13px;color:var(--text2);max-width:320px;line-height:1.7}
+
+    .toast{position:fixed;bottom:26px;right:26px;
+      background:linear-gradient(135deg,rgba(74,30,0,.97),rgba(26,10,0,.98));
+      border:1px solid var(--border2);border-radius:14px;padding:13px 22px;
+      font-size:13px;font-weight:500;color:var(--cream);
+      box-shadow:0 10px 40px rgba(0,0,0,.6);
+      transform:translateY(90px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);
+      z-index:999;min-width:220px;max-width:360px}
+    .toast.show{transform:translateY(0);opacity:1}
+
+    .empty-state{padding:52px;text-align:center;color:var(--text3);font-size:13px}
+    .empty-icon{font-size:44px;margin-bottom:14px;opacity:.4;display:block}
+
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+    @media(max-width:860px){
+      .sidebar{width:56px}
+      .brand-name,.brand-sub,.nav-item span,.nav-section,.brand-status,.nav-num,.nav-key-badge{display:none}
+      .stats-row{grid-template-columns:repeat(2,1fr)}
+      .form-grid{grid-template-columns:1fr}
+      .product-grid{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <span class="login-cone">🍦</span>
+    <div class="login-title">Glassfabriken ERP</div>
+    <div class="login-sub">Ice Cream Factory · Industrial System</div>
+
+    <!-- shown when a saved key is found -->
+    <div class="login-saved-info" id="saved-info">🔑 Saved key found — click Access to continue</div>
+
+    <div class="login-divider">API Access Key</div>
+    <label class="login-label" for="login-key">Enter your key</label>
+    <input class="login-input" type="password" id="login-key"
+      placeholder="glassfabriken-secret-…"
+      onkeydown="if(event.key==='Enter')doLogin()"/>
+
+    <div class="login-remember">
+      <input type="checkbox" id="remember-me" checked/>
+      <label for="remember-me">Remember this key in my browser</label>
+    </div>
+
+    <button class="login-btn" onclick="doLogin()">🔐 Access System</button>
+    <div class="login-err" id="login-err">❌ Invalid key — please try again</div>
+    <button class="login-clear" id="login-clear" onclick="clearSavedKey()">🗑 Clear saved key</button>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">🍦</span>
+      <div class="brand-name">GLASSFABRIKEN</div>
+      <div class="brand-sub">ERP System v1.0</div>
+      <div class="brand-status">
+        <span class="brand-dot" id="nav-dot"></span>
+        <span id="nav-status">connecting…</span>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Operations</div>
+      <button class="nav-item" onclick="goHome(this)"><span class="nav-icon">🏠</span><span>Dashboard</span></button>
+      <button class="nav-item" onclick="selectMenu(1,this)"><span class="nav-icon">🛒</span><span>Process Order</span><span class="nav-num">1</span></button>
+      <button class="nav-item" onclick="selectMenu(2,this)"><span class="nav-icon">📂</span><span>Batch Orders</span><span class="nav-num">2</span></button>
+      <div class="nav-section">Master Data</div>
+      <button class="nav-item" onclick="selectMenu(3,this)"><span class="nav-icon">👤</span><span>Customers</span><span class="nav-num">3</span></button>
+      <button class="nav-item" onclick="selectMenu(4,this)"><span class="nav-icon">🍧</span><span>Products</span><span class="nav-num">4</span></button>
+      <button class="nav-item" onclick="selectMenu(5,this)"><span class="nav-icon">✏️</span><span>Edit / Delete</span><span class="nav-num">5</span></button>
+      <div class="nav-section">System</div>
+      <button class="nav-item" onclick="selectMenu(6,this)"><span class="nav-icon">⛔</span><span>Shutdown</span><span class="nav-num">6</span></button>
+    </nav>
+    <div class="nav-key-badge">🔑 Key: <span id="sidebar-key-status">not saved</span></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="status-chip" id="status-chip">⬤ &nbsp;CONNECTING</div>
+        <button class="logout-btn" onclick="doLogout()">🔓 Change Key</button>
+      </div>
+    </div>
+
+    <div class="hero" id="hero-section">
+      <img class="hero-img"
+        src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=1400&q=85&fit=crop"
+        alt="Ice cream" onerror="this.style.display='none'"/>
+      <div class="hero-overlay">
+        <div class="hero-content">
+          <div class="hero-title">Wholesale Ice Cream<br><em>Factory ERP</em></div>
+          <div class="hero-sub">Manage orders, inventory &amp; customers — all in one place</div>
+          <div class="hero-badges">
+            <span class="hero-badge badge-choc">🏭 Glassfabriken Industrial</span>
+            <span class="hero-badge badge-mint" id="hero-api-badge">⬤ Connecting…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card" style="--bar:var(--caramel)"><span class="stat-icon">🍦</span><div class="stat-label">Products</div><div class="stat-val" id="stat-p">—</div><div class="stat-sub">in catalog</div></div>
+      <div class="stat-card" style="--bar:var(--mint)"><span class="stat-icon">👤</span><div class="stat-label">Customers</div><div class="stat-val" id="stat-c">—</div><div class="stat-sub">registered</div></div>
+      <div class="stat-card" style="--bar:var(--vanilla)"><span class="stat-icon">🌐</span><div class="stat-label">API Status</div><div class="stat-val" style="font-size:16px;margin-top:8px" id="stat-api">OFFLINE</div><div class="stat-sub">port 8003</div></div>
+      <div class="stat-card" style="--bar:var(--strawberry)"><span class="stat-icon">⏱</span><div class="stat-label">Session</div><div class="stat-val" style="font-size:22px" id="stat-time">00:00</div><div class="stat-sub">active</div></div>
+    </div>
+
+    <div class="content" id="main-content">
+      <div class="panel" id="main-panel">
+        <div class="panel-header"><div class="panel-title">🍦 Welcome to Glassfabriken ERP</div></div>
+        <div class="panel-body">
+          <div class="empty-state"><span class="empty-icon">☝️</span>Select an operation from the sidebar to begin.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "http://192.176.243.141:8003";
+const STORAGE_KEY = "glassfabriken_api_key";
+let HEADERS = {"Content-Type":"application/json"};
+
+const ICE_PHOTOS=[
+  "https://images.unsplash.com/photo-1488900128323-21503983a07e?w=400&q=80&fit=crop",
+  "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=400&q=80&fit=crop",
+  "https://images.unsplash.com/photo-1543158181-1274e5362710?w=400&q=80&fit=crop",
+  "https://images.unsplash.com/photo-1580915411954-282cb1b0d780?w=400&q=80&fit=crop",
+  "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&q=80&fit=crop",
+  "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=400&q=80&fit=crop",
+  "https://images.unsplash.com/photo-1567206563114-c179706c2e8a?w=400&q=80&fit=crop",
+  "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=400&q=80&fit=crop",
+  "https://images.unsplash.com/photo-1557142046-c704a3adf364?w=400&q=80&fit=crop",
+  "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?w=400&q=80&fit=crop"
+];
+const EMOJI_MAP={"10001":"🍦","10002":"🌈","10003":"🍪","10004":"🍓","10005":"🍫","10006":"🫐","10007":"🍋","10008":"🍑","10009":"🥭","10010":"🍬"};
+const FALLBACK=["🍨","🍧","🧁","🎂","🍡","🍮","🧇"];
+function getEmoji(sku){return EMOJI_MAP[sku]||FALLBACK[parseInt(sku||0)%FALLBACK.length]||"🍨";}
+function getPhoto(sku){return ICE_PHOTOS[parseInt(sku||0)%ICE_PHOTOS.length];}
+
+// Session timer
+let sec=0;
+setInterval(()=>{sec++;const m=String(Math.floor(sec/60)).padStart(2,'0'),s=String(sec%60).padStart(2,'0');const el=document.getElementById('stat-time');if(el)el.textContent=`${m}:${s}`;},1000);
+
+// ── KEY STORAGE ──────────────────────────────────────────────────────────────
+function getSavedKey(){ try{return localStorage.getItem(STORAGE_KEY);}catch{return null;} }
+function saveKey(key){ try{localStorage.setItem(STORAGE_KEY,key);}catch{} }
+function deleteKey(){ try{localStorage.removeItem(STORAGE_KEY);}catch{} }
+
+// On page load — check if key already saved
+window.addEventListener('DOMContentLoaded',()=>{
+  const saved=getSavedKey();
+  if(saved){
+    document.getElementById('login-key').value=saved;
+    document.getElementById('saved-info').style.display='block';
+    document.getElementById('login-clear').style.display='block';
+    document.getElementById('sidebar-key-status').textContent='saved ✓';
+    document.getElementById('sidebar-key-status').style.color='var(--mint)';
+    // Auto-login with saved key
+    autoLogin(saved);
+  }
+});
+
+function autoLogin(key){
+  fetch(`${API}/products`,{headers:{"X-API-Key":key,"Content-Type":"application/json"}})
+    .then(res=>{
+      if(res.ok){
+        HEADERS={"X-API-Key":key,"Content-Type":"application/json"};
+        document.getElementById('login-overlay').style.display='none';
+        checkHealth();
+      }else{
+        // Saved key is no longer valid — show login
+        deleteKey();
+        document.getElementById('saved-info').style.display='none';
+        document.getElementById('login-clear').style.display='none';
+        document.getElementById('login-key').value='';
+        showLoginError('⚠️ Saved key rejected — please re-enter');
+      }
+    })
+    .catch(()=>{
+      // Server unreachable — still hide overlay and let them in (offline grace)
+      HEADERS={"X-API-Key":key,"Content-Type":"application/json"};
+      document.getElementById('login-overlay').style.display='none';
+      showToast('⚠️ Server unreachable — working offline');
+    });
+}
+
+function doLogin(){
+  const key=document.getElementById('login-key').value.trim();
+  if(!key){showLoginError('⚠️ Please enter your API key');return;}
+  document.getElementById('login-err').style.display='none';
+
+  fetch(`${API}/products`,{headers:{"X-API-Key":key,"Content-Type":"application/json"}})
+    .then(res=>{
+      if(res.ok){
+        HEADERS={"X-API-Key":key,"Content-Type":"application/json"};
+        // Save if checkbox ticked
+        if(document.getElementById('remember-me').checked){
+          saveKey(key);
+          document.getElementById('sidebar-key-status').textContent='saved ✓';
+          document.getElementById('sidebar-key-status').style.color='var(--mint)';
+        }
+        document.getElementById('login-overlay').style.display='none';
+        checkHealth();
+        showToast('✅ Access granted — welcome!');
+      }else{
+        showLoginError('❌ Invalid key — please try again');
+      }
+    })
+    .catch(()=>showLoginError('❌ Cannot reach server at '+API));
+}
+
+function showLoginError(msg){
+  const el=document.getElementById('login-err');
+  el.textContent=msg;el.style.display='block';
+}
+
+function clearSavedKey(){
+  deleteKey();
+  document.getElementById('login-key').value='';
+  document.getElementById('saved-info').style.display='none';
+  document.getElementById('login-clear').style.display='none';
+  document.getElementById('sidebar-key-status').textContent='not saved';
+  document.getElementById('sidebar-key-status').style.color='';
+  showToast('🗑 Saved key cleared');
+}
+
+function doLogout(){
+  deleteKey();
+  HEADERS={"Content-Type":"application/json"};
+  document.getElementById('login-key').value='';
+  document.getElementById('saved-info').style.display='none';
+  document.getElementById('login-clear').style.display='none';
+  document.getElementById('login-err').style.display='none';
+  document.getElementById('login-overlay').style.display='flex';
+  document.getElementById('sidebar-key-status').textContent='not saved';
+  showToast('🔓 Key cleared — please re-enter');
+}
+
+// ── HEALTH ───────────────────────────────────────────────────────────────────
+async function checkHealth(){
+  try{
+    const res=await fetch(`${API}/health`,{signal:AbortSignal.timeout(3000)});
+    if(res.ok){
+      document.getElementById('nav-dot').classList.add('live');
+      document.getElementById('nav-status').textContent='online';
+      const chip=document.getElementById('status-chip');
+      chip.textContent='⬤  ONLINE';chip.classList.add('online');
+      document.getElementById('stat-api').textContent='ONLINE';
+      document.getElementById('stat-api').style.color='var(--mint)';
+      document.getElementById('hero-api-badge').textContent='⬤  Live on port 8003';
+      loadStats();
+    }
+  }catch(_){}
+}
+
+async function loadStats(){
+  try{
+    const[p,c]=await Promise.all([
+      fetch(`${API}/products`,{headers:HEADERS}),
+      fetch(`${API}/customers`,{headers:HEADERS})
+    ]);
+    const pd=await p.json(),cd=await c.json();
+    document.getElementById('stat-p').textContent=Array.isArray(pd)?pd.length:Object.keys(pd).length;
+    document.getElementById('stat-c').textContent=Array.isArray(cd)?cd.length:Object.keys(cd).length;
+  }catch(_){}
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+function formatPrice(v){return typeof v==='number'?`${v.toFixed(2)} SEK`:v??'—';}
+function maskAddress(a){if(!a)return'—';const p=a.split(' ');return p[0]+' '+(p[1]||'').slice(0,1)+'***';}
+function maskDiscount(){return'••%';}
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────────
+function goHome(el){
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.getElementById('topbar-title').textContent='Dashboard';
+  document.getElementById('hero-section').classList.remove('hidden');
+  document.getElementById('stats-row').classList.remove('hidden');
+  document.getElementById('main-content').classList.remove('expanded');
+  document.getElementById('main-panel').innerHTML=`
+    <div class="panel-header"><div class="panel-title">🍦 Welcome to Glassfabriken ERP</div></div>
+    <div class="panel-body"><div class="empty-state"><span class="empty-icon">☝️</span>Select an operation from the sidebar to begin.</div></div>`;
+}
+
+const titles={1:'Process Order',2:'Batch Orders',3:'Customer Management',4:'Product Catalog',5:'Edit / Delete Product',6:'System Shutdown'};
+function selectMenu(n,el){
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.getElementById('topbar-title').textContent=titles[n];
+  document.getElementById('hero-section').classList.add('hidden');
+  document.getElementById('stats-row').classList.add('hidden');
+  document.getElementById('main-content').classList.add('expanded');
+  ({1:panel1,2:panel2,3:panel3,4:panel4,5:panel5,6:panel6})[n]();
+}
+
+function setPanel(title,html){
+  document.getElementById('main-panel').innerHTML=`
+    <div class="panel-header"><div class="panel-title">${title}</div></div>
+    <div class="panel-body">${html}</div>`;
+}
+
+// ── PANEL 1 — Process Order ──────────────────────────────────────────────────
+let orderLines=[];
+function panel1(){
+  setPanel('🛒 Process Order',`
+    <div class="order-section">
+      <div class="order-row">
+        <div class="form-group"><label class="form-label">Customer ID or Name</label>
+          <input class="form-input" id="o-customer" placeholder="e.g. C1001 or Alfa Livs"/></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadProducts()">🔍 Load Products</button>
+      </div>
+      <div id="sku-selector" style="display:none">
+        <div class="form-group"><label class="form-label">Select Product</label>
+          <select class="form-input" id="sku-select"><option value="">-- Pick a flavour --</option></select></div>
+        <div style="display:flex;gap:10px;margin-top:10px;align-items:flex-end">
+          <div class="form-group" style="width:130px"><label class="form-label">Quantity</label>
+            <input class="form-input" id="sku-qty" type="number" min="1" value="1"/></div>
+          <button class="btn btn-primary btn-sm" onclick="addLineItem()">➕ Add to Order</button>
+        </div>
+      </div>
+      <div id="line-items" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div id="submit-order-row" style="display:none">
+        <button class="btn btn-vanilla" onclick="submitOrder()">🧾 Process &amp; Print Invoice</button>
+      </div>
+      <div id="invoice-output"></div>
+    </div>`);
+  orderLines=[];
+}
+
+async function loadProducts(){
+  try{
+    const res=await fetch(`${API}/products`,{headers:HEADERS});if(!res.ok)throw new Error();
+    const data=await res.json();const list=Array.isArray(data)?data:Object.values(data);
+    const sel=document.getElementById('sku-select');
+    sel.innerHTML='<option value="">-- Pick a flavour --</option>';
+    list.forEach(p=>{const o=document.createElement('option');o.value=p.sku;
+      o.textContent=`${getEmoji(p.sku)} ${p.name} (${p.sku}) — ${formatPrice(p.price_sek)} | Stock: ${p.stock??0}`;
+      sel.appendChild(o);});
+    document.getElementById('sku-selector').style.display='block';
+    showToast('✅ Products loaded!');
+  }catch{showToast('❌ Could not load products.');}
+}
+
+function addLineItem(){
+  const sku=document.getElementById('sku-select').value;
+  const qty=parseInt(document.getElementById('sku-qty').value);
+  if(!sku){showToast('⚠️ Select a product');return;}
+  if(!qty||qty<1){showToast('⚠️ Qty must be ≥ 1');return;}
+  const sel=document.getElementById('sku-select');
+  const name=sel.options[sel.selectedIndex].text.split('(')[0].replace(/^.\s/,'').trim();
+  const ex=orderLines.find(l=>l.sku===sku);
+  if(ex){ex.qty+=qty;}else{orderLines.push({sku,qty,name});}
+  renderLineItems();document.getElementById('sku-qty').value=1;
+  document.getElementById('submit-order-row').style.display='block';
+}
+
+function renderLineItems(){
+  const c=document.getElementById('line-items');
+  if(!orderLines.length){c.innerHTML='';return;}
+  c.innerHTML=orderLines.map((l,i)=>`
+    <div class="line-item">
+      <span>${getEmoji(l.sku)} ${l.name} <span class="mono">${l.sku}</span></span>
+      <input type="number" min="1" value="${l.qty}" onchange="updateQty(${i},this.value)"/>
+      <button class="remove-btn" onclick="removeLine(${i})">✕</button>
+    </div>`).join('');
+}
+
+function updateQty(i,v){orderLines[i].qty=Math.max(1,parseInt(v)||1);renderLineItems();}
+function removeLine(i){orderLines.splice(i,1);renderLineItems();if(!orderLines.length)document.getElementById('submit-order-row').style.display='none';}
+
+async function submitOrder(){
+  const customer=document.getElementById('o-customer').value.trim();
+  if(!customer){showToast('⚠️ Enter customer');return;}
+  if(!orderLines.length){showToast('⚠️ Basket empty');return;}
+  try{
+    const payload={customer_id:customer,lines:orderLines.map(l=>({sku:l.sku,qty:l.qty}))};
+    const[calcRes,ordRes]=await Promise.all([
+      fetch(`${API}/calculate-order`,{method:'POST',headers:HEADERS,body:JSON.stringify(payload)}),
+      fetch(`${API}/orders`,{method:'POST',headers:HEADERS,body:JSON.stringify(payload)})
+    ]);
+    const calc=await calcRes.json(),ord=await ordRes.json();
+    if(ordRes.ok){
+      const gross=calc.subtotal??0,disc=calc.discount_amount??0,total=calc.total??0;
+      document.getElementById('invoice-output').innerHTML=`
+        <div class="invoice" style="margin-top:20px">
+          <h3>🧾 Order Confirmation — ${ord.order_id??'—'}</h3>
+          <div class="inv-meta">Customer: <strong>${calc.customer??customer}</strong><br>Address: ${calc.address??'—'} &nbsp;|&nbsp; Discount: ${calc.discount_pct??0}%</div>
+          <div class="inv-row header"><span>PRODUCT</span><span>SKU</span><span>QTY</span><span>AMOUNT</span></div>
+          ${orderLines.map(l=>`<div class="inv-row"><span>${getEmoji(l.sku)} ${l.name}</span><span class="mono">${l.sku}</span><span>${l.qty}</span><span>—</span></div>`).join('')}
+          <div class="inv-row discount" style="justify-content:flex-end">Discount: −${disc.toFixed(2)} SEK</div>
+          <div class="inv-row total" style="justify-content:flex-end">TOTAL: ${total.toFixed(2)} SEK</div>
+        </div>`;
+      orderLines=[];renderLineItems();document.getElementById('submit-order-row').style.display='none';
+      showToast('✅ Order placed!');loadStats();
+    }else{showToast(`❌ ${ord.detail||'Order failed'}`);}
+  }catch{showToast('❌ Connection error');}
+}
+
+// ── PANEL 2 — Batch Orders ───────────────────────────────────────────────────
+function panel2(){
+  setPanel('📂 Batch Process Orders',`
+    <p style="font-size:13px;color:var(--text2);margin-bottom:18px">Upload a JSON file to batch process multiple orders at once.</p>
+    <label class="file-zone" id="file-zone">
+      <input type="file" accept=".json" id="json-file" onchange="handleFileUpload()"/>
+      <div style="font-size:36px;margin-bottom:10px">📁</div>
+      <p>Click or drag JSON order file here</p>
+      <p style="font-size:11px;opacity:.4;margin-top:4px">[{"customer_id":"C1001","lines":[{"sku":"10001","qty":2}]}]</p>
+    </label>
+    <div id="batch-results" style="margin-top:18px;display:flex;flex-direction:column;gap:10px"></div>`);
+  const zone=document.getElementById('file-zone');
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.style.borderColor='var(--caramel)';});
+  zone.addEventListener('dragleave',()=>zone.style.borderColor='');
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.style.borderColor='';const f=e.dataTransfer.files[0];if(f)processBatchFile(f);});
+}
+function handleFileUpload(){const f=document.getElementById('json-file').files[0];if(f)processBatchFile(f);}
+function processBatchFile(file){
+  const r=new FileReader();
+  r.onload=async(e)=>{
+    let batch;try{batch=JSON.parse(e.target.result);}catch{showToast('❌ Invalid JSON');return;}
+    if(!Array.isArray(batch))batch=[batch];
+    const c=document.getElementById('batch-results');
+    c.innerHTML=`<div style="font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace">Processing ${batch.length} order(s)…</div>`;
+    for(let i=0;i<batch.length;i++){
+      const entry=batch[i];
+      const payload={customer_id:entry.customer_id??entry.customer,lines:(entry.lines??[]).map(l=>({sku:l.sku,qty:parseInt(l.qty)}))};
+      try{
+        const res=await fetch(`${API}/orders`,{method:'POST',headers:HEADERS,body:JSON.stringify(payload)});
+        const data=await res.json();
+        if(res.ok){c.insertAdjacentHTML('beforeend',`<div style="background:rgba(0,200,150,.07);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--mint);font-family:'JetBrains Mono',monospace">✓ Entry #${i+1} — ${data.order_id??'OK'}</div>`);}
+        else{c.insertAdjacentHTML('beforeend',`<div style="background:rgba(255,77,109,.07);border:1px solid rgba(255,77,109,.2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--strawberry)">✗ Entry #${i+1} — ${data.detail??'Failed'}</div>`);}
+      }catch{c.insertAdjacentHTML('beforeend',`<div style="background:rgba(255,77,109,.07);border:1px solid rgba(255,77,109,.2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--strawberry)">✗ Entry #${i+1} — Network error</div>`);}
+    }
+    showToast(`✅ Batch complete: ${batch.length} orders`);
+  };
+  r.readAsText(file);
+}
+
+// ── PANEL 3 — Customers ──────────────────────────────────────────────────────
+function panel3(){
+  setPanel('👤 Customer Management',`
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Customer ID</label><input class="form-input" id="c-id" placeholder="e.g. C1004"/></div>
+      <div class="form-group"><label class="form-label">Company Name</label><input class="form-input" id="c-name" placeholder="e.g. Delta Livsmedel"/></div>
+      <div class="form-group full"><label class="form-label">Shipping Address</label><input class="form-input" id="c-addr" placeholder="e.g. Deltavägen 4"/></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="c-email" type="email" placeholder="e.g. info@delta.se"/></div>
+      <div class="form-group"><label class="form-label">Discount % (0–100)</label><input class="form-input" id="c-disc" type="number" min="0" max="100" value="0"/></div>
+      <div class="form-actions">
+        <button class="btn btn-mint" onclick="submitCustomer()">✅ Register Customer</button>
+        <button class="btn btn-ghost" onclick="loadCustomerList()">📋 View All</button>
+      </div>
+    </div>
+    <div id="customer-list" style="margin-top:20px"></div>`);
+  loadCustomerList();
+}
+
+async function submitCustomer(){
+  const cid=document.getElementById('c-id').value.trim(),name=document.getElementById('c-name').value.trim();
+  const addr=document.getElementById('c-addr').value.trim(),email=document.getElementById('c-email').value.trim();
+  const disc=parseInt(document.getElementById('c-disc').value)||0;
+  if(!cid||!name){showToast('⚠️ ID and Name required');return;}
+  try{
+    const res=await fetch(`${API}/customers`,{method:'POST',headers:HEADERS,body:JSON.stringify({customer_id:cid,name,address:addr,email,discount_pct:disc})});
+    if(res.ok){showToast(`✅ '${name}' registered`);['c-id','c-name','c-addr','c-email'].forEach(i=>document.getElementById(i).value='');document.getElementById('c-disc').value='0';loadStats();}
+    else if(res.status===409){showToast('⚠️ Customer ID already exists');}
+    else{showToast('❌ Server error');}
+  }catch{showToast('❌ Connection error');}
+}
+
+async function loadCustomerList(){
+  try{
+    const res=await fetch(`${API}/customers`,{headers:HEADERS});const data=await res.json();
+    const list=Array.isArray(data)?data:Object.values(data);
+    document.getElementById('customer-list').innerHTML=`
+      <div class="sec-note">🔒 Address and discount fields are masked for privacy</div>
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Address</th><th>Discount</th></tr></thead>
+        <tbody>${list.map(c=>`<tr>
+          <td class="mono">${c.customer_id??'—'}</td><td>${c.name??'—'}</td>
+          <td class="masked">${maskAddress(c.address)}</td>
+          <td class="masked">${maskDiscount()}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+  }catch{showToast('❌ Could not load customers');}
+}
+
+// ── PANEL 4 — Products ───────────────────────────────────────────────────────
+function panel4(){
+  setPanel('🍧 Product Catalog',`
+    <div class="form-grid" style="margin-bottom:22px">
+      <div class="form-group"><label class="form-label">SKU</label><input class="form-input" id="p-sku" placeholder="e.g. 10011"/></div>
+      <div class="form-group"><label class="form-label">Product Name</label><input class="form-input" id="p-name" placeholder="e.g. Unicorn Swirl"/></div>
+      <div class="form-group"><label class="form-label">Price (SEK)</label><input class="form-input" id="p-price" type="number" step="0.01" placeholder="e.g. 29.99"/></div>
+      <div class="form-group"><label class="form-label">Stock (antal)</label><input class="form-input" id="p-stock" type="number" placeholder="e.g. 100"/></div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="submitProduct()">✨ Add Product</button>
+        <button class="btn btn-ghost" onclick="loadProductCards()">🍦 View Catalog</button>
+      </div>
+    </div>
+    <div id="product-list"></div>`);
+  loadProductCards();
+}
+
+async function submitProduct(){
+  const sku=document.getElementById('p-sku').value.trim(),name=document.getElementById('p-name').value.trim();
+  const price=parseFloat(document.getElementById('p-price').value),stock=parseInt(document.getElementById('p-stock').value);
+  if(!sku||!name||isNaN(price)||isNaN(stock)){showToast('⚠️ All fields required');return;}
+  try{
+    const res=await fetch(`${API}/products`,{method:'POST',headers:HEADERS,body:JSON.stringify({sku,name,price_sek:price,stock})});
+    if(res.ok){showToast(`✅ '${name}' added`);['p-sku','p-name','p-price','p-stock'].forEach(i=>document.getElementById(i).value='');loadProductCards();loadStats();}
+    else if(res.status===409){showToast('⚠️ SKU already exists');}
+    else{showToast('❌ Error adding product');}
+  }catch{showToast('❌ Connection error');}
+}
+
+async function loadProductCards(){
+  try{
+    const res=await fetch(`${API}/products`,{headers:HEADERS});const data=await res.json();
+    const list=Array.isArray(data)?data:Object.values(data);
+    document.getElementById('product-list').innerHTML=`
+      <div class="product-grid">
+        ${list.map(p=>`
+        <div class="product-card">
+          <img class="product-img" src="${getPhoto(p.sku)}" alt="${p.name}"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="product-img-placeholder" style="display:none">🍦</div>
+          <div class="product-info">
+            <div class="product-name">${p.name}</div>
+            <div class="product-sku">${p.sku}</div>
+            <div class="product-footer">
+              <span class="product-price">${formatPrice(p.price_sek)}</span>
+              <span class="${(p.stock??0)<10?'stock-low':'stock-ok'}">${p.stock??0} ${(p.stock??0)<10?'⚠':'✓'}</span>
+            </div>
+          </div>
+        </div>`).join('')}
+      </div>`;
+  }catch{showToast('❌ Could not load products');}
+}
+
+// ── PANEL 5 — Edit / Delete ──────────────────────────────────────────────────
+function panel5(){
+  setPanel('✏️ Edit / Delete Product',`
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Click <strong>Edit</strong> to update price or stock inline. Click <strong>Delete</strong> to remove permanently.</p>
+    <button class="btn btn-ghost btn-sm" onclick="loadEditableProducts()" style="margin-bottom:16px">↺ Refresh</button>
+    <div id="edit-product-list"></div>`);
+  loadEditableProducts();
+}
+
+async function loadEditableProducts(){
+  try{
+    const res=await fetch(`${API}/products`,{headers:HEADERS});const data=await res.json();
+    const list=Array.isArray(data)?data:Object.values(data);
+    if(!list.length){document.getElementById('edit-product-list').innerHTML='<p style="font-size:13px;color:var(--text3)">No products found.</p>';return;}
+    document.getElementById('edit-product-list').innerHTML=`
+      <table class="data-table">
+        <thead><tr><th>SKU</th><th>Name</th><th>Price (SEK)</th><th>Stock</th><th>Actions</th></tr></thead>
+        <tbody>${list.map(p=>`<tr id="row-${p.sku}">
+          <td class="mono">${p.sku}</td><td>${p.name}</td>
+          <td><span class="price-tag">${formatPrice(p.price_sek)}</span></td>
+          <td class="${(p.stock??0)<10?'stock-low':'stock-ok'}">${p.stock??0}</td>
+          <td style="display:flex;gap:6px">
+            <button class="tbl-btn tbl-btn-edit" onclick="startEdit('${p.sku}',${p.price_sek??0},${p.stock??0})">✏️ Edit</button>
+            <button class="tbl-btn tbl-btn-del" onclick="deleteProduct('${p.sku}','${p.name}')">🗑️ Delete</button>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+  }catch{showToast('❌ Could not load products');}
+}
+
+function startEdit(sku,price,stock){
+  const row=document.getElementById(`row-${sku}`);row.className='edit-row';
+  row.innerHTML=`<td class="mono">${sku}</td><td style="font-size:12px;color:var(--text3)">editing…</td>
+    <td><input type="number" id="ep-${sku}" value="${price}" step="0.01" min="0"/></td>
+    <td><input type="number" id="es-${sku}" value="${stock}" min="0"/></td>
+    <td style="display:flex;gap:6px">
+      <button class="tbl-btn tbl-btn-edit" onclick="saveEdit('${sku}')">💾 Save</button>
+      <button class="tbl-btn tbl-btn-del" onclick="loadEditableProducts()">✕ Cancel</button>
+    </td>`;
+}
+
+async function saveEdit(sku){
+  const price=parseFloat(document.getElementById(`ep-${sku}`).value);
+  const stock=parseInt(document.getElementById(`es-${sku}`).value);
+  if(isNaN(price)||price<0){showToast('⚠️ Invalid price');return;}
+  if(isNaN(stock)||stock<0){showToast('⚠️ Invalid stock');return;}
+  try{
+    const res=await fetch(`${API}/products/${sku}`,{method:'PUT',headers:HEADERS,body:JSON.stringify({price_sek:price,stock})});
+    if(res.ok){showToast(`✅ ${sku} updated`);loadEditableProducts();}
+    else{showToast('❌ Update failed');}
+  }catch{showToast('❌ Connection error');}
+}
+
+async function deleteProduct(sku,name){
+  if(!confirm(`Delete "${name}" (${sku})? This cannot be undone.`))return;
+  try{
+    const res=await fetch(`${API}/products/${sku}`,{method:'DELETE',headers:HEADERS});
+    if(res.ok){showToast(`🗑️ "${name}" deleted`);loadEditableProducts();loadStats();}
+    else{showToast('❌ Delete failed');}
+  }catch{showToast('❌ Connection error');}
+}
+
+// ── PANEL 6 — Shutdown ───────────────────────────────────────────────────────
+function panel6(){
+  setPanel('⛔ System Shutdown',`
+    <div class="shutdown-box">
+      <div style="font-size:64px;opacity:.4">⛔</div>
+      <h3>Confirm System Shutdown</h3>
+      <p>This will terminate the Glassfabriken ERP server running on port 8003. All active sessions will end.</p>
+      <button class="btn btn-danger" onclick="terminateSystem()">Confirm Shutdown</button>
+      <div id="shutdown-status" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text3);margin-top:10px"></div>
+    </div>`);
+}
+
+async function terminateSystem(){
+  document.getElementById('shutdown-status').textContent='Sending shutdown signal…';
+  try{await fetch(`${API}/shutdown`,{method:'POST',headers:HEADERS});}catch{}
+  document.getElementById('shutdown-status').textContent='Server terminated.';
+  const chip=document.getElementById('status-chip');
+  chip.textContent='⬤  OFFLINE';chip.classList.remove('online');
+  showToast('👋 Server shut down');
+}
+</script>
+</body>
+</html>
