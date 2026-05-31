@@ -1,0 +1,11 @@
+sku,name,antal_i_lager,price_sek
+10001,Vaniljpuck,82,14.0
+10002,Chokladstrut,30,20.0
+10003,Jordgubbsglass,13,23.0
+10004,Onion Swirl,40,30.0
+10006,Grape Swirl,40,10.0
+10008,Black Forest,50,22.8
+10010,Lolly berry,40,30.0
+102,Rabbri,40,10.0
+100034,Mango lassi,60,30.0
+PROD-TEST-99,Test Product,100,10.0

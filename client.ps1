@@ -1,11 +1,11 @@
 # =============================================================================
 #  Glassfabriken ERP — PowerShell REST Client
-#  Calls the FastAPI server running on http://192.176.243.141:8003
+#  Calls the FastAPI server running on http://127.0.0.1:8003
 #  All protected endpoints require the X-API-Key header.
 #  Usage: .\client.ps1
 # =============================================================================
 
-$base = "http://192.176.243.141:8003"
+$base = "http://127.0.0.1:8003"
 
 # API key — must match the key defined in server.py
 $headers = @{"X-API-Key" = "glassfabriken-secret-2025"}
